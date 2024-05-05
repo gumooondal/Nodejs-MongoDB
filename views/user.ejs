@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/main.css" rel="stylesheet">
+</head>
+<body class="grey-bg">
+    <%- include('nav.ejs')%>
+    <div class="white-bg">
+        <% for (let i =0; i < user.length; i++) { %>
+        <div class="list-box">
+          <h4><a href="/detail/<%=user[i]._id%>"><%= user[i].username%></a>
+            <a href="/edit/<%=user[i]._id%>">✏️</a>
+            <span class="delete">🗑️</span>
+          </h4>
+        </div>   
+        <% } %>   
+      </div>   
+      <script>
+        document.querySelectorAll('.delete')[0].addEventListener('click', function(){
+          fetch('/abc', {
+            method : 'POST' , 
+            headers :{
+              'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify({a : 1})
+          })
+        })
+      </script>
+</body>
+</html>
