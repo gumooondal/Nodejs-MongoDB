@@ -3,6 +3,7 @@ const app = express()
 const methodOverride = require('method-override')
 const bcrypt = require('bcrypt')
 const MongoStore = require('connect-mongo')
+require('dotenv').config()
 
 app.use(methodOverride('_method')) 
 app.use(express.static(__dirname +'/public'))
@@ -22,7 +23,7 @@ app.use(session({
   saveUninitialized : false,
   cookie : { maxAge : 60 * 60 * 1000},
   store : MongoStore.create({
-    mongoUrl : 'mongodb+srv://gumooondal:1234@cluster0.k6sqf9p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+    mongoUrl : process.env.DB_URL,
     dbName : 'forum'
   })
 }))
@@ -33,12 +34,12 @@ app.use(passport.session())
 const { MongoClient, ObjectId } = require('mongodb')
 
 let db
-const url = 'mongodb+srv://gumooondal:1234@cluster0.k6sqf9p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+const url = process.env.DB_URL
 new MongoClient(url).connect().then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
-  app.listen(8080, () => {
-    console.log('http://localhost:8080 에서 서버 실행중')
+  app.listen(process.env.PORT, () => {
+    console.log('http://localhost:'+process.env.PORT+' 에서 서버 실행중')
 })
 
 }).catch((err)=>{
