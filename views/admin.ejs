@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/main.css" rel="stylesheet">
+</head>
+<body class="grey-bg">
+    <%- include('nav.ejs') %>
+    <p><%= user.username%>님 환영합니다.관리자</p>
+
+    <div class="white-bg">
+        <% for (let i =0; i < center.length; i++) { %>
+        <div class="list-box">
+            <h4><%= center[i].centerno%>.<%= center[i].centername%>, 
+                주소 : <%= center[i].address%>,
+                번호 : <%= center[i].phonenumber%>
+            </h4>
+        </div>   
+        <% } %>   
+    </div> 
+</body>
+</html>
