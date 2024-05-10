@@ -131,3 +131,7 @@ app.get('/user',async (요청, 응답) =>{
   let result = await db.collection('user').find().toArray()
   응답.render('user.ejs', {user : result})
 })
+
+app.get('/addLocation', (요청,응답) =>{
+  응답.render('addLocation.ejs')
+})
