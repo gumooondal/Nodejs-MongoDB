@@ -20,9 +20,11 @@
         </div>   
         <% } %>   
     </div> 
+    <a href="/list/next/<%= center[center.length-1]._id %>">다음</a>
     <button id="inputBtn">입력</button>
 </body>
 <script>
+    
     document.getElementById("inputBtn").addEventListener("click", function(){
         window.location.href = "/addLocation";
     })
