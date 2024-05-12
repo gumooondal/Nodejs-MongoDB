@@ -90,7 +90,7 @@ app.get('/login2', (요청, 응답)=>{
 app.post('/login', async (요청, 응답, next) => {
   let username = 요청.body.username;
   let user = await db.collection('user').findOne({username: username});
-  let centernames = await db.collection('location').find().toArray();
+  let centernames = await db.collection('location').find().limit(5).toArray();
 
   passport.authenticate('local', (error, user, info) => {
       if (error) return 응답.status(500).json(error)
@@ -100,8 +100,11 @@ app.post('/login', async (요청, 응답, next) => {
         
         // 로그인한 사용자가 관리자인지 확인하여 페이지를 분기합니다.
         if (username === 'admin@mail.com') {
+          // 페이지 번호와 페이지 당 아이템 수를 요청에서 가져옵니다.
+          let page = parseInt(요청.query.page) || 1;
+          let perPage = parseInt(요청.query.perPage) || 5;
           // 관리자 페이지로 이동
-          응답.render('admin.ejs', { user: user, center: centernames });
+          return 응답.redirect('/admin');
         } else {
           // 일반 사용자 페이지로 이동
           return 응답.render('afterLogin.ejs', { user: user });
@@ -135,3 +138,21 @@ app.get('/user',async (요청, 응답) =>{
 app.get('/addLocation', (요청,응답) =>{
   응답.render('addLocation.ejs')
 })
+
+app.get('/admin/2', async(요청,응답) =>{
+  let centernames = await db.collection('location').find().skip(5).limit
+  (5).toArray();
+  응답.render(admin.ejs, { centernames: centernames });
+})
+
+app.get('/admin', async (요청, 응답) => {
+  let centernames = await db.collection('location').find().limit(5).toArray();
+  응답.render('admin.ejs', { user: 요청.user, center: centernames });
+});
+ 
+app.get('/admin2', async (요청, 응답) => {
+  let username = 요청.body.username;
+  let user = await db.collection('user').findOne({username: username});
+  let centernames = await db.collection('location').find().skip(5).limit(5).toArray();
+  응답.render('admin.ejs', { user: 요청.user, center: centernames });
+});
