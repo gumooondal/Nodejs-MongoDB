@@ -139,18 +139,19 @@ app.get('/addLocation', (요청,응답) =>{
   응답.render('addLocation.ejs')
 })
 
-app.get('/admin/2', async(요청,응답) =>{
-  let centernames = await db.collection('location').find().skip(5).limit
-  (5).toArray();
-  응답.render(admin.ejs, { centernames: centernames });
-})
+// 잘못된 예제
+// app.get('/admin/2', async(요청,응답) =>{
+//   let centernames = await db.collection('location').find().skip(5).limit
+//   (5).toArray();
+//   응답.render(admin.ejs, { centernames: centernames });
+// })
 
 app.get('/admin', async (요청, 응답) => {
   let centernames = await db.collection('location').find().limit(5).toArray();
   응답.render('admin.ejs', { user: 요청.user, center: centernames });
 });
  
-app.get('/admin2', async (요청, 응답) => {
+app.get('/admin/2', async (요청, 응답) => {
   let username = 요청.body.username;
   let user = await db.collection('user').findOne({username: username});
   let centernames = await db.collection('location').find().skip(5).limit(5).toArray();
