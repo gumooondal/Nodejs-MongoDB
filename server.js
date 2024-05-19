@@ -33,9 +33,10 @@ app.use(passport.session())
 
 const { MongoClient, ObjectId } = require('mongodb')
 
-let db
-const url = process.env.DB_URL
-new MongoClient(url).connect().then((client)=>{
+let connectDB = require('./database.js')
+
+let db;
+connectDB.then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
   app.listen(process.env.PORT, () => {
