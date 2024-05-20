@@ -158,3 +158,13 @@ app.get('/admin/2', async (요청, 응답) => {
   let centernames = await db.collection('location').find().skip(5).limit(5).toArray();
   응답.render('admin.ejs', { user: 요청.user, center: centernames });
 });
+
+// 라우터 나누는 것도 해야함
+
+app.get('/', (요청, 응답) => {
+  응답.sendFile(__dirname + '/index.html')
+}) 
+
+app.get('/map', (요청, 응답) =>{
+  응답.render('map.ejs')
+})
