@@ -166,5 +166,31 @@ app.get('/', (요청, 응답) => {
 }) 
 
 app.get('/map', (요청, 응답) =>{
-  응답.render('map.ejs')
+  응답.render('map.ejs',{
+    javascriptkey:process.env.javascriptkey
 })
+})
+
+app.post('/search', async (req, res) => {
+  const keyword = req.body.keyword;
+  console.log('Received keyword:', keyword);
+
+  try {
+      // 키워드가 포함된 centername 필드를 검색
+      let centernames = await db.collection('location').find({ centername: { $regex: keyword, $options: 'i' } }).toArray();
+
+      if (centernames.length > 0) {
+          console.log(centernames[0].centername,centernames[0].latitude,centernames[0].
+          longitude);
+          // 키워드를 처리하고 적절히 응답
+          res.json({ message: 'Keyword received', keyword: keyword, results: centernames });
+      } else {
+          // 해당하는 데이터가 없음을 클라이언트에게 알림
+          res.status(404).json({ message: 'No data found for the keyword' });
+          console.log('해당데이터 없음');
+      }
+  } catch (error) {
+      console.error('Error fetching documents:', error);
+      res.status(500).json({ message: 'Error fetching documents', error: error.message });
+  }
+});
