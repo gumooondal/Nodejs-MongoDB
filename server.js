@@ -1,20 +1,26 @@
-const express = require('express')
+const express = require('express') //express라이브러리를 사용하겠다는 뜻
 const app = express()
-const methodOverride = require('method-override')
-const bcrypt = require('bcrypt')
-const MongoStore = require('connect-mongo')
-require('dotenv').config()
-
-app.use(methodOverride('_method')) 
-app.use(express.static(__dirname +'/public'))
-app.set('view engine', 'ejs')
-app.use(express.json())
+//---------------------------------
+app.use(express.static(__dirname +'/public')) //css파일 등록
+//---------------------------------
+const MongoStore = require('connect-mongo') //mongodb 라이브러리 셋팅
+//---------------------------------
+app.set('view engine', 'ejs') //ejs 셋팅
+//---------------------------------
+app.use(express.json()) //유저가 보낸 정보를 서버에서 쉽게 출력해보기 위한 셋팅
 app.use(express.urlencoded({extended:true}))
-
-// passport라이브러리
-const session = require('express-session')
+//---------------------------------
+const methodOverride = require('method-override') //form에서 put,delete 요청할 수 있는 방법
+app.use(methodOverride('_method')) 
+//---------------------------------
+const session = require('express-session') // passport라이브러리
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+//---------------------------------
+require('dotenv').config() //.env파일에 환경변수 보관하기 위한
+const registerRouter = require('./route/register.js')
+
+const bodyParser = require('body-parser');
 
 app.use(passport.initialize())
 app.use(session({
@@ -29,16 +35,22 @@ app.use(session({
 }))
 
 app.use(passport.session())
-// ---
-
-const { MongoClient, ObjectId } = require('mongodb')
-
-let connectDB = require('./database.js')
-
+//---------------------------------
+const bcrypt = require('bcrypt') //hashing 알고리즘
+//---------------------------------
+const { MongoClient, ObjectId } = require('mongodb') //세션을 DB에 저장하기 위한 connect-mongo라이브러리
+//---------------------------------
+let connectDB = require('./database.js') //라우터파일에서 DB쓰기위한
+//---------------------------------
 let db;
 connectDB.then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
+
+  const mapRouter = require('./route/main.js')(db)
+
+  app.use('/main',mapRouter)
+  //서버 띄우는 코드
   app.listen(process.env.PORT, () => {
     console.log('http://localhost:'+process.env.PORT+' 에서 서버 실행중')
 })
@@ -116,20 +128,22 @@ app.post('/login', async (요청, 응답, next) => {
 
 })
 
-app.get('/register', (요청, 응답)=>{
-  응답.render('register.ejs')
-})
+app.use('/register',registerRouter)
 
-app.post('/register', async (요청, 응답)=>{
-  let username = 요청.body.username;
-  let 해시 = await bcrypt.hash(요청.body.password, 10)
+// app.get('/register', (요청, 응답) => {
+//   응답.render('register.ejs')
+// })
 
-  await db.collection('user').insertOne({
-    username : 요청.body.username,
-    password : 해시
-  })
-  응답.render('afterLogin.ejs', { user: { username: username } });
-})
+// app.post('/register', async (요청, 응답) => {
+//   let useemail = 요청.body.useemail;
+//   let 해시 = await bcrypt.hash(요청.body.password, 10)
+
+//   await db.collection('user').insertOne({
+//       useemail: 요청.body.useemail,
+//       password: 해시
+//   })
+//   응답.render('afterLogin.ejs', { user: { useemail: useemail } });
+// })
 
 app.get('/user',async (요청, 응답) =>{
   let result = await db.collection('user').find().toArray()
