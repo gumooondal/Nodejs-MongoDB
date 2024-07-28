@@ -69,20 +69,31 @@
             },
             body: JSON.stringify({ keyword: keyword })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                 throw new Error('상호명이 틀렸거나 존재하지 않습니다.');
+             }
+            return response.json();
+        })
         .then(data => {
             console.log('Success:', data);
+            console.log(data.results);
+            locationData = data.results;
+            console.log(locationData);
+            console.log(locationData[0].centername);
 
-            // 응답에 따라 지도를 업데이트
-            var newCenter = new kakao.maps.LatLng(37.4743761, 126.9814529);
+           // 응답에 따라 지도를 업데이트
+           var newCenter = new kakao.maps.LatLng(locationData[0].latitude,locationData[0].longitude);
             map.setCenter(newCenter);
             marker.setPosition(newCenter);
-            infowindow.setContent('<div style="padding:5px;">더클라임 사당점<br><a href="https://map.kakao.com/link/map/New Location!,37.4743761,126.9814529" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/New Location!,37.4743761,126.9814529" style="color:blue" target="_blank">길찾기</a></div>');
+            infowindow.setContent('<div style="padding:5px;">' + locationData[0].centername + '<br><a href="https://map.kakao.com/link/map/'+ locationData[0].centername +','+locationData[0].latitude+','+locationData[0].longitude+'" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/' + locationData[0].centername + ','+locationData[0].latitude+','+locationData[0].longitude+'" style="color:blue" target="_blank">길찾기</a></div>');
             infowindow.setPosition(newCenter);
-        })
+            }
+        )
         .catch(error => {
-            console.error('Error:', error);
+            alert(error.message);
         });
+        
     }
 </script>
 </html>

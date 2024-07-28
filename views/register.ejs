@@ -10,6 +10,7 @@
     <title>Signin Template · Bootstrap v5.3</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sign-in/">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     
 
@@ -120,19 +121,19 @@
 
     
 <main class="form-signin w-100 m-auto">
-  <form class="form-box" action="/register" method="POST">
-    <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+  <form class="form-box" action="/register/regSubmit" method="POST">
     <h1 class="h3 mb-3 fw-normal">회원가입 후 이용해주세요</h1>
 
     <div class="form-floating">
-      <input name="username" class="form-control" id="floatingInput" placeholder="name@example.com">
+      <input name="useremail" class="form-control" id="floatingInput" placeholder="name@example.com">
       <label for="floatingInput">이메일</label>
+      <div id="emailFeedback" style="color: red;"></div>
     </div>
     <div class="form-floating">
       <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
       <label for="floatingPassword">비밀번호</label>
+      <div id="passwordFeedback" style="color: red;"></div>
     </div>
-
    
     <button class="btn btn-warning w-100 py-2 mb-3" type="submit">가입</button>    
   </form>
@@ -142,9 +143,118 @@
 <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>
-  document.getElementById("registerButton").onclick = function() {
-      window.location.href = "/register";
-  };
+  // document.getElementById("registerButton").onclick = function() {
+  //     window.location.href = "/register";
+  // };
+
+ // 클라이언트 측
+// $('#floatingInput').on('blur', function() {
+//   const email = $(this).val();
+//   console.log('Email entered:', email);
+
+//   if (email.length > 0) {
+//     $.ajax({
+//       url: '/register/check-email',
+//       method: 'POST',
+//       contentType: 'application/json',
+//       data: JSON.stringify({ email: email }),
+//       success: function(response) {
+//         console.log('Server response:', response);
+//         if (response.exists) {
+//           $('#emailFeedback').text('이 이메일은 이미 사용 중입니다.');
+//         } else {
+//           $('#emailFeedback').text('');
+//         }
+//       },
+//       error: function(error) {
+//         console.log('Error:', error);
+//       }
+//     });
+//   } else {
+//     $('#emailFeedback').text('');
+//   }
+// });
+
+$(document).ready(function() {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      $('#floatingInput').on('blur', function() {
+        const email = $(this).val();
+        console.log('이메일:', email);
+
+        if (!emailRegex.test(email)) {
+          $('#emailFeedback').text('유효한 이메일 주소를 입력해주세요.');
+          return;
+        } 
+
+        $.ajax({
+          url: '/register/check-email',  // 요청을 보낼 URL
+          method: 'POST',  // 요청 방식 (GET, POST 등)
+          contentType: 'application/json',  // 전송할 데이터의 콘텐츠 타입
+          data: JSON.stringify({ email: email }),  // 서버로 보낼 데이터
+          success: function(response) {  // 요청이 성공하면 호출될 함수
+            // response 객체를 통해 서버의 응답 데이터를 처리
+            if (response.exists) {
+              $('#emailFeedback').text('이 이메일은 이미 사용 중입니다.');
+            } else {
+              $('#emailFeedback').text('');
+            }
+          },
+          error: function(error) {
+            console.error('Error checking email:', error);
+          }
+        });
+      });
+
+      $('#floatingPassword').on('blur', function() {
+        const email = $('#floatingInput').val();
+        const password = $(this).val();
+        console.log('비밀번호:', password);
+
+        if (email.length === 0) {
+          $('#emailFeedback').text('이메일을 먼저 입력해주세요.');
+          $('#passwordFeedback').text('');
+        } else{
+          $('#emailFeedback').text('');
+          
+          // 비밀번호 유효성 검사
+          if (password.length < 8) {
+            $('#passwordFeedback').text('비밀번호는 최소 8자 이상이어야 합니다.');
+          } else if (!/[A-Z]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 대문자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[a-z]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 소문자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[0-9]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 숫자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[!@#$%^&*]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 특수 문자가 하나 이상 포함되어야 합니다.');
+          } else {
+            $('#passwordFeedback').text('');
+          }
+        }
+      });
+
+      // 이메일 필드에 텍스트가 입력되면 이메일 필드의 메시지 초기화
+      $('#floatingInput').on('input', function() {
+        const password = $(this).val();
+        $('#emailFeedback').text('');
+
+        // 비밀번호 유효성 검사
+        if (password.length < 8) {
+            $('#passwordFeedback').text('비밀번호는 최소 8자 이상이어야 합니다.');
+          } else if (!/[A-Z]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 대문자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[a-z]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 소문자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[0-9]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 숫자가 하나 이상 포함되어야 합니다.');
+          } else if (!/[!@#$%^&*]/.test(password)) {
+            $('#passwordFeedback').text('비밀번호에는 특수 문자가 하나 이상 포함되어야 합니다.');
+          } else {
+            $('#passwordFeedback').text('');
+          }
+      });
+    });
 </script>
 
 </body>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>메인 페이지</title>
+    <link href="/map.css" rel="stylesheet">
+    
+</head>
+<body>
+    <div class="container">
+        <div class="search-area" id="searchArea">
+            <div class="search-top">
+                <div class="top-top">
+                    <input type="text" class="inputbox" placeholder="장소를 입력하세요" id="searchInput">
+                </div>
+                <div class="top-bottom">
+                    <div class="btnArea-search" id="btnSearch">
+                        <button class="btn-search" onclick="searchPlaces()">검색</button>
+                    </div>
+                    <div class="btnArea-my" id="btnMy">My</div>
+                </div>
+            </div>
+            <div class="search-bottom" id="pagination-container">
+                <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+        <div class="map-area">
+            <div class="map" id="map"></div>
+        </div>
+    </div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=03963931ac47a435fe5c53e993bbb32d"></script>
+<script>
+const locationList = <%- JSON.stringify(locationList) %>;
+
+// JavaScript에서 locationList를 사용하는 예시
+locationList.forEach(location => {
+  console.log(`Name: ${location.centername}, Latitude: ${location.latitude}, Longitude: ${location.longitude}`);
+});
+
+let currentPage = 1;
+        const pageSize = 4; // 페이지당 항목 수
+
+        function searchPlaces() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            fetch(`/main/searchAction?q=${encodeURIComponent(query)}&page=${currentPage}&pageSize=${pageSize}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('검색 결과를 찾을 수 없습니다.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data); // 데이터 확인
+                    
+                    const container = document.getElementById('pagination-container');
+                    container.innerHTML = ''; // 이전 결과 제거
+
+                    // 데이터가 배열이고 요소가 있는지 확인
+                    if (Array.isArray(data.data) && data.data.length > 0) {
+                        data.data.forEach(location => {
+                            const div = document.createElement('div');
+                            div.classList.add('bottom-list', 'active'); // 'active' 클래스를 추가하여 보이게 함
+                            div.innerHTML = `
+                                <strong>${location.centername}</strong>
+                                <p>
+                                    주소 - ${location.address}<br>
+                                    연락처 - ${location.phonenumber}
+                                </p>
+                            `;
+                            container.appendChild(div);
+                        });
+
+                        // 페이지네이션 버튼 추가
+                        const pagination = document.createElement('div');
+                        pagination.classList.add('pagination');
+
+                        // Previous 버튼
+                        if (data.currentPage > 1) {
+                            pagination.innerHTML += `<button onclick="changePage(${data.currentPage - 1})">Previous</button>`;
+                        }
+
+                        // Page 번호
+                        for (let i = 1; i <= data.totalPages; i++) {
+                            pagination.innerHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                        }
+
+                        // Next 버튼
+                        if (data.currentPage < data.totalPages) {
+                            pagination.innerHTML += `<button onclick="changePage(${data.currentPage + 1})">Next</button>`;
+                        }
+
+                        container.appendChild(pagination);
+                    } else {
+                        container.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                    const container = document.getElementById('pagination-container');
+                    container.innerHTML = `<div class="bottom-list"><p>${error.message}</p></div>`;
+                });
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            searchPlaces(); // 현재 페이지로 검색 실행
+        }
+
+
+const positions = locationList.map(location => ({
+  content: `
+    <div style="padding:5px;">
+      ${location.centername}! <br>
+      <a href="https://map.kakao.com/link/map/${encodeURIComponent(location.centername)},${location.latitude},${location.longitude}" style="color:blue" target="_blank">큰지도보기</a> 
+      <a href="https://map.kakao.com/link/to/${encodeURIComponent(location.centername)},${location.latitude},${location.longitude}" style="color:blue" target="_blank">길찾기</a>
+    </div>`,
+  latlng: new kakao.maps.LatLng(parseFloat(location.latitude), parseFloat(location.longitude))
+}));
+
+console.log(positions);
+
+let sumLat = 0;
+let sumLng = 0;
+
+positions.forEach(position => {
+    sumLat += position.latlng.getLat();
+    sumLng += position.latlng.getLng();
+});
+
+const avgLat = sumLat / positions.length;
+const avgLng = sumLng / positions.length;
+
+console.log('중앙 위도:', avgLat);
+console.log('중앙 경도:', avgLng);
+
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
+    mapOption = { 
+        center: new kakao.maps.LatLng(avgLat, avgLng), // 지도의 중심좌표
+        level: 8 // 지도의 확대 레벨
+    };
+
+var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+ 
+
+for (var i = 0; i < positions.length; i ++) {
+    // 마커를 생성합니다
+    var marker = new kakao.maps.Marker({
+        map: map, // 마커를 표시할 지도
+        position: positions[i].latlng // 마커의 위치
+    });
+
+    // 마커에 표시할 인포윈도우를 생성합니다 
+    var infowindow = new kakao.maps.InfoWindow({
+        content: positions[i].content // 인포윈도우에 표시할 내용
+    });
+
+    // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
+    // 이벤트 리스너로는 클로저를 만들어 등록합니다 
+    // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
+    kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
+    kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+}
+
+// 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
+function makeOverListener(map, marker, infowindow) {
+    return function() {
+        infowindow.open(map, marker);
+    };
+}
+
+// 인포윈도우를 닫는 클로저를 만드는 함수입니다 
+function makeOutListener(infowindow) {
+    return function() {
+        infowindow.close();
+    };
+}
+</script>
+</body>
+</html>

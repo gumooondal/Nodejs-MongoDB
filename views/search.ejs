@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>마커 생성하기</title>
+    <link href="/map.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container">
+        <div class="search-area" id="searchArea">
+            <div class="search-top">
+                <div class="top-top">
+                    <input type="text" class="inputbox" placeholder="장소를 입력하세요" id="searchInput">
+                </div>
+                <div class="top-bottom">
+                    <div class="btnArea-search" id="btnSearch">
+                        <button class="btn-search" onclick="searchPlaces()">검색</button>
+                    </div>
+                    <div class="btnArea-my" id="btnMy">My</div>
+                </div>
+            </div>
+            <div class="search-bottom" id="pagination-container">
+                <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+    <script>
+ let currentPage = 1;
+        const pageSize = 4; // 페이지당 항목 수
+
+        function searchPlaces() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            fetch(`/main/searchAction?q=${encodeURIComponent(query)}&page=${currentPage}&pageSize=${pageSize}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('검색 결과를 찾을 수 없습니다.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data); // 데이터 확인
+                    
+                    const container = document.getElementById('pagination-container');
+                    container.innerHTML = ''; // 이전 결과 제거
+
+                    // 데이터가 배열이고 요소가 있는지 확인
+                    if (Array.isArray(data.data) && data.data.length > 0) {
+                        data.data.forEach(location => {
+                            const div = document.createElement('div');
+                            div.classList.add('bottom-list', 'active'); // 'active' 클래스를 추가하여 보이게 함
+                            div.innerHTML = `
+                                <strong>${location.centername}</strong>
+                                <p>
+                                    주소 - ${location.address}<br>
+                                    연락처 - ${location.phonenumber}
+                                </p>
+                            `;
+                            container.appendChild(div);
+                        });
+
+                        // 페이지네이션 버튼 추가
+                        const pagination = document.createElement('div');
+                        pagination.classList.add('pagination');
+
+                        // Previous 버튼
+                        if (data.currentPage > 1) {
+                            pagination.innerHTML += `<button onclick="changePage(${data.currentPage - 1})">Previous</button>`;
+                        }
+
+                        // Page 번호
+                        for (let i = 1; i <= data.totalPages; i++) {
+                            pagination.innerHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                        }
+
+                        // Next 버튼
+                        if (data.currentPage < data.totalPages) {
+                            pagination.innerHTML += `<button onclick="changePage(${data.currentPage + 1})">Next</button>`;
+                        }
+
+                        container.appendChild(pagination);
+                    } else {
+                        container.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                    const container = document.getElementById('pagination-container');
+                    container.innerHTML = `<div class="bottom-list"><p>${error.message}</p></div>`;
+                });
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            searchPlaces(); // 현재 페이지로 검색 실행
+        }
+    </script>
+</body>
+</html>
