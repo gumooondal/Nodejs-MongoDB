@@ -37,59 +37,69 @@
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=03963931ac47a435fe5c53e993bbb32d"></script>
     <script>
-        const locationList = <%- JSON.stringify(locationList) %>;
+          const locationList = <%- JSON.stringify(locationList) %>;
 
-        // JavaScript에서 locationList를 사용하는 예시
-        locationList.forEach(location => {
-        console.log(`Name: ${location.centername}, Latitude: ${location.latitude}, Longitude: ${location.longitude}`);
-        });
+let map; // 전역 변수로 맵 객체를 선언
+let markers = []; // 전역 변수로 마커 배열을 선언
+let currentPage = 1;
+const pageSize = 4; // 페이지당 항목 수
+let lastQuery = '';
 
-        let currentPage = 1;
-        const pageSize = 4; // 페이지당 항목 수
+function initMap() {
+    const container = document.getElementById('map');
+    const options = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780), // 초기 중앙 위치를 서울로 설정
+        level: 8
+    };
+    map = new kakao.maps.Map(container, options);
+    if (locationList.length > 0) {
+        showMarkers(locationList);
+    }
+}
 
-        function searchPlaces() {
-                const query = document.getElementById('searchInput').value.trim();
-    
-                // 검색어가 변경되면 currentPage를 1로 초기화
-                if (query !== lastQuery) {
+function searchPlaces() {
+    const query = document.getElementById('searchInput').value.trim();
+
+    // 검색어가 변경되면 currentPage를 1로 초기화
+    if (query !== lastQuery) {
+        currentPage = 1;
+        lastQuery = query;
+    }
+
+    fetch(`/main/searchAction?q=${encodeURIComponent(query)}&page=${currentPage}&pageSize=${pageSize}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('검색 결과를 찾을 수 없습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data); // 데이터 확인
+
+            const container = document.getElementById('pagination-container');
+            container.innerHTML = ''; // 이전 결과 제거
+
+            // 데이터가 배열이고 요소가 있는지 확인
+            if (Array.isArray(data.data) && data.data.length > 0) {
+                // 현재 페이지가 총 페이지 수를 초과하면 currentPage를 1로 재설정
+                if (data.currentPage > data.totalPages) {
                     currentPage = 1;
-                    lastQuery = query;
+                    searchPlaces(); // 다시 검색
+                    return;
                 }
 
-                fetch(`/main/searchAction?q=${encodeURIComponent(query)}&page=${currentPage}&pageSize=${pageSize}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('검색 결과를 찾을 수 없습니다.');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Received data:', data); // 데이터 확인
-            
-                    const container = document.getElementById('pagination-container');
-                    container.innerHTML = ''; // 이전 결과 제거
-
-                    // 데이터가 배열이고 요소가 있는지 확인
-                    if (Array.isArray(data.data) && data.data.length > 0) {
-                        // 현재 페이지가 총 페이지 수를 초과하면 currentPage를 1로 재설정
-                        if (data.currentPage > data.totalPages) {
-                            currentPage = 1;
-                            searchPlaces(); // 다시 검색
-                            return;
-                    }
-
-                    data.data.forEach(location => {
-                        const div = document.createElement('div');
-                        div.classList.add('bottom-list', 'active'); // 'active' 클래스를 추가하여 보이게 함
-                        div.innerHTML = `
-                            <strong>${location.centername}</strong>
-                            <p>
-                                주소 - ${location.address}<br>
-                                연락처 - ${location.phonenumber}
-                            </p>
-                        `;
-                        container.appendChild(div);
-                    });
+                data.data.forEach(location => {
+                    const div = document.createElement('div');
+                    div.classList.add('bottom-list', 'active'); // 'active' 클래스를 추가하여 보이게 함
+                    div.innerHTML = `
+                        <strong>${location.centername}</strong>
+                        <p>
+                            주소 - ${location.address}<br>
+                            연락처 - ${location.phonenumber}
+                        </p>
+                    `;
+                    container.appendChild(div);
+                });
 
                 // 페이지네이션 버튼 추가
                 const pagination = document.createElement('div');
@@ -110,29 +120,25 @@
                     pagination.innerHTML += `<button onclick="changePage(${data.currentPage + 1})">Next</button>`;
                 }
 
-                    container.appendChild(pagination);
-                } else {
-                    container.innerHTML = '<p>검색 결과가 없습니다.</p>';
-                }
-            })
-                .catch(error => {
-                    console.error('Error:', error.message);
-                    const container = document.getElementById('pagination-container');
-                    container.innerHTML = `<div class="bottom-list"><p>${error.message}</p></div>`;
-            });
-                }
+                container.appendChild(pagination);
 
-            function changePage(page) {
-                currentPage = page;
-                searchPlaces(); // 현재 페이지로 검색 실행
+                // 지도에 마커 표시
+                showMarkers(data.data);
+            } else {
+                container.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                // 기존 마커를 모두 제거
+                removeMarkers();
             }
+        })
+        .catch(error => {
+            console.error('Error:', error.message);
+            const container = document.getElementById('pagination-container');
+            container.innerHTML = `<div class="bottom-list"><p>${error.message}</p></div>`;
+        });
+}
 
-        // 마지막 검색어를 저장하기 위한 변수
-        let lastQuery = '';
-
-        document.getElementById('btnSearch').addEventListener('click', searchPlaces);
-
-        const positions = locationList.map(location => ({
+function showMarkers(locations) {
+    const positions = locations.map(location => ({
         content: `
             <div style="padding:5px;">
             ${location.centername}! <br>
@@ -140,65 +146,56 @@
             <a href="https://map.kakao.com/link/to/${encodeURIComponent(location.centername)},${location.latitude},${location.longitude}" style="color:blue" target="_blank">길찾기</a>
             </div>`,
         latlng: new kakao.maps.LatLng(parseFloat(location.latitude), parseFloat(location.longitude))
-        }));
+    }));
 
-        console.log(positions);
+    let sumLat = 0;
+    let sumLng = 0;
 
-        let sumLat = 0;
-        let sumLng = 0;
+    positions.forEach(position => {
+        sumLat += position.latlng.getLat();
+        sumLng += position.latlng.getLng();
+    });
 
-        positions.forEach(position => {
-            sumLat += position.latlng.getLat();
-            sumLng += position.latlng.getLng();
+    const avgLat = sumLat / positions.length;
+    const avgLng = sumLng / positions.length;
+
+    // 지도 중심을 검색된 위치의 중앙으로 이동
+    map.setCenter(new kakao.maps.LatLng(avgLat, avgLng));
+
+    // 기존 마커를 모두 제거
+    removeMarkers();
+
+    // 새로운 마커를 지도에 추가
+    positions.forEach(position => {
+        const marker = new kakao.maps.Marker({
+            map: map,
+            position: position.latlng
         });
 
-        const avgLat = sumLat / positions.length;
-        const avgLng = sumLng / positions.length;
-
-        console.log('중앙 위도:', avgLat);
-        console.log('중앙 경도:', avgLng);
-
-        var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
-            mapOption = { 
-                center: new kakao.maps.LatLng(avgLat, avgLng), // 지도의 중심좌표
-                level: 8 // 지도의 확대 레벨
-        };
-
-        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
- 
-
-        for (var i = 0; i < positions.length; i ++) {
-            // 마커를 생성합니다
-            var marker = new kakao.maps.Marker({
-                map: map, // 마커를 표시할 지도
-                position: positions[i].latlng // 마커의 위치
+        const infowindow = new kakao.maps.InfoWindow({
+            content: position.content
         });
 
-        // 마커에 표시할 인포윈도우를 생성합니다 
-        var infowindow = new kakao.maps.InfoWindow({
-            content: positions[i].content // 인포윈도우에 표시할 내용
-        });
+        kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
+        kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
 
-        // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
-        // 이벤트 리스너로는 클로저를 만들어 등록합니다 
-        // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
-        kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
-        kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
-        }
+        markers.push(marker); // 마커 배열에 추가
+    });
+}
 
-        // 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
-        function makeOverListener(map, marker, infowindow) {
-            return function() {
-                infowindow.open(map, marker);
-            };
-        }
+// 기존 마커를 모두 제거하는 함수
+function removeMarkers() {
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+}
 
-        // 인포윈도우를 닫는 클로저를 만드는 함수입니다 
-        function makeOutListener(infowindow) {
-            return function() {
-                infowindow.close();
-            };
-        }
+function changePage(page) {
+    currentPage = page;
+    searchPlaces(); // 현재 페이지로 검색 실행
+}
+
+window.onload = initMap; // 페이지 로드 시 초기 맵을 생성
+document.getElementById('btnSearch').addEventListener('click', searchPlaces);
     </script>
 </body>
 </html>
