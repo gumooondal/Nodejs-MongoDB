@@ -151,7 +151,7 @@ app.post('/login', async (요청, 응답, next) => {
         let page = parseInt(요청.query.page) || 1;
         let perPage = parseInt(요청.query.perPage) || 5;
         // 관리자 페이지로 이동
-        return 응답.redirect('/admin');
+        return 응답.redirect('/main');
       } else {
         // 일반 사용자 페이지로 이동
         return 응답.render('afterLogin.ejs', { user: user });
@@ -163,7 +163,7 @@ app.post('/login', async (요청, 응답, next) => {
 })
 
 // 로그아웃 처리 라우터를 설정합니다.
-app.get('/logout', (req, res, next) => {
+app.post('/logout', (req, res, next) => {
   // req.logout 메서드를 호출하여 로그아웃합니다.
   req.logout(err => {
     if (err) {
@@ -175,7 +175,7 @@ app.get('/logout', (req, res, next) => {
       // 클라이언트 측 세션 쿠키를 삭제합니다.
       res.clearCookie('connect.sid');
       // 로그아웃 후 홈 페이지로 리디렉션합니다.
-      res.redirect('/afterLogin.ejs');
+      res.redirect('/main');
     });
   });
 });
@@ -204,6 +204,10 @@ app.get('/user', async (요청, 응답) => {
 
 app.get('/addLocation', (요청, 응답) => {
   응답.render('addLocation.ejs')
+})
+
+app.get('/mainCopy', (요청, 응답) => {
+  응답.render('mainCopy.ejs')
 })
 
 // 잘못된 예제
