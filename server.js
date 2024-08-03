@@ -97,7 +97,7 @@ passport.serializeUser((user, done) => {
   process.nextTick(() => {
     // 사용자 객체에서 필요한 정보만 추출하여 세션에 저장합니다.
     // 여기서는 사용자 ID와 사용자명을 세션에 저장합니다.
-    done(null, { id: user._id, username: user.username });
+    done(null, { id: user._id, username : user.username });
   });
 });
 
@@ -134,8 +134,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/check-login', (req, res) => {
+  if (req.isAuthenticated()) {
+      res.json({ loggedIn: true });
+  } else {
+      res.json({ loggedIn: false });
+  }
+});
+
 app.post('/login', async (요청, 응답, next) => {
   let username = 요청.body.username;
+  console.log(username)
   let user = await db.collection('user').findOne({ username: username });
   let centernames = await db.collection('location').find().limit(5).toArray();
 
@@ -146,7 +155,7 @@ app.post('/login', async (요청, 응답, next) => {
       if (err) return next(err);
 
       // 로그인한 사용자가 관리자인지 확인하여 페이지를 분기합니다.
-      if (username === 'admin@mail.com') {
+      if (user === 'admin@mail.com') {
         // 페이지 번호와 페이지 당 아이템 수를 요청에서 가져옵니다.
         let page = parseInt(요청.query.page) || 1;
         let perPage = parseInt(요청.query.perPage) || 5;
@@ -217,17 +226,17 @@ app.get('/mainCopy', (요청, 응답) => {
 //   응답.render(admin.ejs, { centernames: centernames });
 // })
 
-app.get('/admin', async (요청, 응답) => {
-  let centernames = await db.collection('location').find().limit(5).toArray();
-  응답.render('admin.ejs', { user: 요청.user, center: centernames });
-});
+// app.get('/admin', async (요청, 응답) => {
+//   let centernames = await db.collection('location').find().limit(5).toArray();
+//   응답.render('admin.ejs', { user: 요청.user, center: centernames });
+// });
 
-app.get('/admin/2', async (요청, 응답) => {
-  let username = 요청.body.username;
-  let user = await db.collection('user').findOne({ username: username });
-  let centernames = await db.collection('location').find().skip(5).limit(5).toArray();
-  응답.render('admin.ejs', { user: 요청.user, center: centernames });
-});
+// app.get('/admin/2', async (요청, 응답) => {
+//   let username = 요청.body.username;
+//   let user = await db.collection('user').findOne({ username: username });
+//   let centernames = await db.collection('location').find().skip(5).limit(5).toArray();
+//   응답.render('admin.ejs', { user: 요청.user, center: centernames });
+// });
 
 // 라우터 나누는 것도 해야함
 

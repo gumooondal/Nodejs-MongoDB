@@ -6,6 +6,7 @@
     <link href="/map.css" rel="stylesheet">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="/js/favorite.js" defer></script>
     
 </head>
 <body>
@@ -120,8 +121,8 @@
                 <p>
                     주소 - ${location.address}<br>
                     연락처 - ${location.phonenumber}
-                      <span class="favorite-icon" onclick="toggleFavorite(this)">
-                        <ion-icon name="star-outline" onclick="sendFavoriteId('${location._id}')">
+                      <span class="favorite-icon" onclick="checkLoginAndToggleFavorite(this, '${location._id}')">
+                        <ion-icon name="star-outline">
                         </ion-icon>
                       </span>                
                 </p>
@@ -130,25 +131,7 @@
         });
     }
 
-    function sendFavoriteId(id) {
-    fetch('/main/favorite', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: id })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('ID successfully sent to server');
-            // 추가로 필요한 경우, UI 업데이트 등을 수행할 수 있습니다
-        } else {
-            console.error('Failed to send ID to server');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+    const isLoggedIn = <%- isLoggedIn %>;
 
     function updatePagination(totalPages) {
         const paginationContainer = document.getElementById('pagination-buttons');
