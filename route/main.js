@@ -4,13 +4,23 @@ const express = require('express');
 module.exports = (db) => {
     const router = express.Router();
 
-    router.get('/', async (요청, 응답) => {
-        let locationList = await db.collection('location').find().toArray()
-        console.log(locationList)
-        let count = await db.collection('location').countDocuments();
-        console.log(`Number of documents: ${count}`);
-        응답.render('main', {locationList : locationList})
-    })
+    router.get('/', async (req, res) => {
+        try {
+            let locationList = await db.collection('location').find().toArray();
+             console.log(locationList);
+            let count = await db.collection('location').countDocuments();
+            console.log(`Number of documents: ${count}`);
+
+            // 세션에서 사용자 데이터 가져오기
+            const user = req.session.user;
+            console.log(user)
+          
+            // 데이터를 포함하여 main 페이지 렌더링
+            res.render('main', { locationList: locationList, user: user });
+        } catch (error) {
+          res.status(500).send(error.message);
+        }
+    });
 
     router.get('/search', (req, res)=>{
         res.render('search.ejs')
@@ -61,15 +71,25 @@ module.exports = (db) => {
     });
     
     router.post('/favorite', async (req, res) => {
-        const { id } = req.body; // 클라이언트로부터 받은 ID
-    
-        // 여기에서 ID를 처리하는 로직을 추가합니다
-        // 예를 들어, 즐겨찾기 목록에 추가하거나 데이터베이스에 저장하는 등의 작업을 수행할 수 있습니다.
-    
-        console.log('Received ID:', id);
-    
-        // 성공 응답을 클라이언트로 반환합니다
-        res.json({ success: true });
+        const { id, username } = req.body; // 클라이언트로부터 받은 ID와 username
+
+        // ID와 username이 제공되었는지 확인
+        if (!id || !username) {
+            return res.status(400).json({ success: false, message: 'ID and username are required' });
+        }
+
+        try {
+            // 로그 출력 (디버깅 용도)
+            console.log('Received ID:', id);
+            console.log('Received Username:', username);
+
+
+            // 성공 응답을 클라이언트로 반환
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
     });
     
       
