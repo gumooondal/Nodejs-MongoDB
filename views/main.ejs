@@ -38,6 +38,7 @@
                     <% if (isLoggedIn) { %>
                         <!-- 로그인 상태일 때 로그아웃 버튼 추가 -->
                         <form action="/logout" method="POST" class="logout-form">
+                            <h1>Welcome, <%= user ? user.username : 'Guest' %>!</h1>
                             <button type="submit" class="btn-logout">로그아웃</button>
                         </form>
                     <% } %>    
@@ -52,6 +53,8 @@
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=03963931ac47a435fe5c53e993bbb32d"></script>
 <script>
     const locationList = <%- JSON.stringify(locationList) %>;
+    const username = '<%= user ? user.username : '' %>';  
+    console.log(username)
 
     let map; // 전역 변수로 맵 객체를 선언
     let markers = []; // 전역 변수로 마커 배열을 선언
