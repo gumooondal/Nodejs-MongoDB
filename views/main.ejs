@@ -208,15 +208,15 @@
             });
 
             let infowindowOpen = false; // 인포윈도우 열림 상태를 저장하는 변수
-
-            kakao.maps.event.addListener(marker, 'click', () => {
-                if (infowindowOpen) {
-                    infowindow.close();
-                } else {
-                    infowindow.open(map, marker);
-                }
-                infowindowOpen = !infowindowOpen; // 상태 토글
-            });
+            //더블클릭을 안하고 다시 검색하면 검색 결과가 바뀌어도 전의 마크가 남아있음
+            // kakao.maps.event.addListener(marker, 'click', () => {
+            //     if (infowindowOpen) {
+            //         infowindow.close();
+            //     } else {
+            //         infowindow.open(map, marker);
+            //     }
+            //     infowindowOpen = !infowindowOpen; // 상태 토글
+            // });
 
             markers.push(marker); // 마커 배열에 추가
         });
