@@ -263,6 +263,12 @@ app.get('/map', (요청, 응답) => {
   })
 })
 
+app.get('/map3', (요청, 응답) => {
+  응답.render('map3.ejs', {
+    javascriptkey: process.env.javascriptkey
+  })
+})
+
 app.post('/search', async (req, res) => {
   const keyword = req.body.keyword;
   console.log('Received keyword:', keyword);
@@ -286,6 +292,7 @@ app.post('/search', async (req, res) => {
     res.status(500).json({ message: 'Error fetching documents', error: error.message });
   }
 });
+
 app.get('/my-data', async (req, res) => {
   console.log('GET request to /my-data received');
   console.log('Query parameters:', req.query);
@@ -314,6 +321,7 @@ app.get('/my-data', async (req, res) => {
 
        // location_id로 위치 데이터 가져오기
        const locations = await locationsCollection.find({ _id: { $in: locationIds } }).toArray();
+       console.log(locations);
 
          // 응답 데이터 포맷팅
          const responseData = `

@@ -1,3 +1,5 @@
+import { favoriteMarkers } from './mapFvt.js';
+
 function checkLoginAndToggleFavorite(element, locationId) {
     // 서버에 로그인 상태 확인 요청
     fetch('/check-login')
@@ -19,7 +21,7 @@ function checkLoginAndToggleFavorite(element, locationId) {
 }
 
 function sendFavoriteId(id) {
-fetch('/main/favorite', {
+fetch('/main/favoriteInsert', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
@@ -45,6 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnMy.addEventListener('click', () => {
         console.log('Sending request with username:', username); 
         fetchMyData(username);
+
+             // 'my' 버튼 클릭 시 favoriteMarkers 함수 호출
+             favoriteMarkers();
     });
 
     function fetchMyData(username) {

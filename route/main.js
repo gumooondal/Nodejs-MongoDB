@@ -7,16 +7,16 @@ module.exports = (db) => {
     router.get('/', async (req, res) => {
         try {
             let locationList = await db.collection('location').find().toArray();
-             console.log(locationList);
+            console.log(locationList);
             let count = await db.collection('location').countDocuments();
             console.log(`Number of documents: ${count}`);
 
             // 세션에서 사용자 데이터 가져오기
             const user = req.session.user;
             console.log(user)
-          
+
             // 데이터를 포함하여 main 페이지 렌더링
-            res.render('main', { locationList: locationList, user: user });
+            res.render('main', { locationList: locationList, user: user});
         } catch (error) {
           res.status(500).send(error.message);
         }
@@ -70,7 +70,7 @@ module.exports = (db) => {
         }
     });
     
-    router.post('/favorite', async (req, res) => {
+    router.post('/favoriteInsert', async (req, res) => {
         const { id, username } = req.body; // 클라이언트로부터 받은 ID와 username
     
         // ID와 username이 제공되었는지 확인
@@ -98,6 +98,6 @@ module.exports = (db) => {
             }
         }
     });
-   
+    
   return router;
 };
