@@ -43,9 +43,20 @@ const { MongoClient, ObjectId } = require('mongodb') //세션을 DB에 저장하
 let connectDB = require('./database.js') //라우터파일에서 DB쓰기위한
 //---------------------------------
 let db;
-connectDB.then((client) => {
+connectDB.then(async(client) => {
   console.log('DB연결성공')
   db = client.db('forum')
+
+  //  // 인덱스 생성 코드 추가
+  //  try {
+  //   await db.collection('favorite').createIndex(
+  //     { username: 1, location_id: 1 },
+  //     { unique: true }
+  //   );
+  //   console.log('Index created successfully.');
+  // } catch (error) {
+  //   console.error('Error creating index:', error);
+  // }
 
   const mapRouter = require('./route/main.js')(db)
   const authRouter = require('./route/auth.js')(db);
@@ -273,5 +284,50 @@ app.post('/search', async (req, res) => {
   } catch (error) {
     console.error('Error fetching documents:', error);
     res.status(500).json({ message: 'Error fetching documents', error: error.message });
+  }
+});
+app.get('/my-data', async (req, res) => {
+  console.log('GET request to /my-data received');
+  console.log('Query parameters:', req.query);
+
+  const username = req.query.username;
+  console.log('Username from GET request:', username);
+
+  if (!username) {
+      console.log('No username provided in query parameters');
+      return res.status(400).json({ success: false, message: 'Username is required' });
+  }
+
+  try {
+      // MongoDB에서 사용자 데이터를 조회합니다
+      const collection = db.collection('favorite');
+      const locationsCollection = db.collection('location');
+
+      const favorites = await collection.find({ username: username }).toArray();
+
+      if (favorites.length === 0) {
+          return res.status(404).json({ success: false, message: 'No data found for the given username' });
+      }
+
+       // location_id를 추출하고 ObjectId로 변환
+       const locationIds = favorites.map(fav =>new ObjectId(fav.location_id));
+
+       // location_id로 위치 데이터 가져오기
+       const locations = await locationsCollection.find({ _id: { $in: locationIds } }).toArray();
+
+         // 응답 데이터 포맷팅
+         const responseData = `
+         <div>
+             <h2>My Favorite List</h2>
+             <ul>
+                 ${locations.map(location => `<li>${location.centername}</li>`).join('')}
+             </ul>
+         </div>
+         `;
+
+      res.send(responseData);
+  } catch (err) {
+      console.error('Database query error:', err);
+      res.status(500).json({ success: false, message: 'Database query error' });
   }
 });

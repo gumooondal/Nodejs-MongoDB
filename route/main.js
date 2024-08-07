@@ -72,26 +72,32 @@ module.exports = (db) => {
     
     router.post('/favorite', async (req, res) => {
         const { id, username } = req.body; // 클라이언트로부터 받은 ID와 username
-
+    
         // ID와 username이 제공되었는지 확인
         if (!id || !username) {
             return res.status(400).json({ success: false, message: 'ID and username are required' });
         }
-
+    
         try {
             // 로그 출력 (디버깅 용도)
             console.log('Received ID:', id);
             console.log('Received Username:', username);
-
-
+    
+            const collection = db.collection('favorite');
+            await collection.insertOne({ location_id: id, username: username, created_at: new Date() });
+    
             // 성공 응답을 클라이언트로 반환
             res.json({ success: true });
         } catch (error) {
-            console.error('Error:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            // 중복된 데이터로 인한 에러 처리
+            if (error.code === 11000) { // DuplicateKeyError
+                res.status(409).json({ success: false, message: 'Duplicate entry detected' });
+            } else {
+                console.error('Error:', error);
+                res.status(500).json({ success: false, message: 'Internal server error' });
+            }
         }
     });
-    
-      
+   
   return router;
 };

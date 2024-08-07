@@ -37,3 +37,30 @@ fetch('/main/favorite', {
 })
 .catch(error => console.error('Error:', error));
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const btnMy = document.getElementById('btnMy');
+    const resultsContainer = document.getElementById('results-container');
+
+    btnMy.addEventListener('click', () => {
+        console.log('Sending request with username:', username); 
+        fetchMyData(username);
+    });
+
+    function fetchMyData(username) {
+        fetch(`/my-data?username=${encodeURIComponent(username)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                resultsContainer.innerHTML = data;
+                console.log('Data successfully fetched and displayed');
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+});
