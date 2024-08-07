@@ -7,6 +7,7 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="/js/favorite.js" defer></script>
+    <script src="/js/btnActive.js"></script>
     
 </head>
 <body>
@@ -17,10 +18,10 @@
                     <input type="text" class="inputbox" placeholder="장소를 입력하세요" id="searchInput">
                 </div>
                 <div class="top-bottom">
-                    <div class="btnArea-search" id="btnSearch">
+                    <div class="btnArea-search" id="btnSearch" onclick="handleButtonClick('search')">
                         <button class="btn-search" onclick="searchPlaces()">검색</button>
                     </div>
-                    <div class="btnArea-my" id="btnMy">
+                    <div class="btnArea-my" id="btnMy" onclick="handleButtonClick('my')">
                         <% if (isLoggedIn) { %>
                             My
                         <% } else { %>
@@ -42,7 +43,7 @@
                             <button type="submit" class="btn-logout">로그아웃</button>
                         </form>
                     <% } %>    
-                </div>
+                </div>          
             </div>
         </div>
         <div class="map-area">
@@ -90,6 +91,12 @@
         })
         .then(data => {
             console.log('Received data:', data); // 데이터 확인
+
+            // 검색 전에 기존 마커를 모두 제거
+            removeMarkers();
+
+            // 기존 검색 결과 HTML 요소 제거
+            document.getElementById('results-container').innerHTML = '';
 
             if (Array.isArray(data.data) && data.data.length > 0) {
                 allSearchResults = data.data; // 모든 검색 결과 저장
@@ -209,14 +216,14 @@
 
             let infowindowOpen = false; // 인포윈도우 열림 상태를 저장하는 변수
             //더블클릭을 안하고 다시 검색하면 검색 결과가 바뀌어도 전의 마크가 남아있음
-            // kakao.maps.event.addListener(marker, 'click', () => {
-            //     if (infowindowOpen) {
-            //         infowindow.close();
-            //     } else {
-            //         infowindow.open(map, marker);
-            //     }
-            //     infowindowOpen = !infowindowOpen; // 상태 토글
-            // });
+            kakao.maps.event.addListener(marker, 'click', () => {
+                if (infowindowOpen) {
+                    infowindow.close();
+                } else {
+                    infowindow.open(map, marker);
+                }
+                infowindowOpen = !infowindowOpen; // 상태 토글
+            });
 
             markers.push(marker); // 마커 배열에 추가
         });
