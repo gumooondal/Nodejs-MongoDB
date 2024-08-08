@@ -294,11 +294,8 @@ app.post('/search', async (req, res) => {
 });
 
 app.get('/my-data', async (req, res) => {
-  console.log('GET request to /my-data received');
-  console.log('Query parameters:', req.query);
 
   const username = req.query.username;
-  console.log('Username from GET request:', username);
 
   if (!username) {
       console.log('No username provided in query parameters');
@@ -316,24 +313,25 @@ app.get('/my-data', async (req, res) => {
           return res.status(404).json({ success: false, message: 'No data found for the given username' });
       }
 
-       // location_id를 추출하고 ObjectId로 변환
-       const locationIds = favorites.map(fav =>new ObjectId(fav.location_id));
+        // location_id를 추출하고 ObjectId로 변환
+        const locationIds = favorites.map(fav =>new ObjectId(fav.location_id));
 
-       // location_id로 위치 데이터 가져오기
-       const locations = await locationsCollection.find({ _id: { $in: locationIds } }).toArray();
-       console.log(locations);
-
-         // 응답 데이터 포맷팅
-         const responseData = `
-         <div>
-             <h2>My Favorite List</h2>
-             <ul>
-                 ${locations.map(location => `<li>${location.centername}</li>`).join('')}
-             </ul>
-         </div>
-         `;
-
-      res.send(responseData);
+        // location_id로 위치 데이터 가져오기
+        const fvtLocations = await locationsCollection.find({ _id: { $in: locationIds } }).toArray();
+        console.log(fvtLocations);
+         
+        res.json({
+          success: true,
+          fvtLocations: fvtLocations,
+          htmlContent: `
+              <div>
+                  <h2>My Favorite List</h2>
+                  <ul>
+                      ${fvtLocations.map(location => `<li>${location.centername}</li>`).join('')}
+                  </ul>
+              </div>
+          `
+      });
   } catch (err) {
       console.error('Database query error:', err);
       res.status(500).json({ success: false, message: 'Database query error' });

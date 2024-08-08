@@ -124,4 +124,8 @@ function changePage(page) {
     updatePagination(Math.ceil(allSearchResults.length / pageSize)); // 페이지네이션 업데이트
 }
 
-document.getElementById('btnSearch').addEventListener('click', searchPlaces);
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btnSearch').addEventListener('click', () => {
+        searchPlaces();
+    });
+});
