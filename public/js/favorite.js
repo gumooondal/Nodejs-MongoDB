@@ -49,20 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMyData(username);
 
              // 'my' 버튼 클릭 시 favoriteMarkers 함수 호출
-             favoriteMarkers();
+             favoriteMarkers(data.fvtLocations);
     });
 
     function fetchMyData(username) {
         fetch(`/my-data?username=${encodeURIComponent(username)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
+            .then(response => response.json())
             .then(data => {
-                resultsContainer.innerHTML = data;
-                console.log('Data successfully fetched and displayed');
+                if (data.success) {
+                    // HTML 콘텐츠를 DOM에 삽입
+                    resultsContainer.innerHTML = data.htmlContent;
+
+                    // fvtLocations 데이터를 이용하여 지도에 마커 표시
+                    favoriteMarkers(data.fvtLocations);
+                } else {
+                    console.error('Error:', data.message);
+                }
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);

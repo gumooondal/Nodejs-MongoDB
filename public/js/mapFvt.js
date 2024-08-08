@@ -2,8 +2,8 @@
 export function favoriteMarkers() {
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
     mapOption = { 
-        center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-        level: 3 // 지도의 확대 레벨
+        center: new kakao.maps.LatLng(37.5665, 126.9780), // 지도의 중심좌표
+        level: 8 // 지도의 확대 레벨
     };
 
 var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
@@ -11,16 +11,16 @@ var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니
 // 마커를 표시할 위치와 title 객체 배열입니다 
 var positions = [
     {
-        title: '카카오', 
-        latlng: new kakao.maps.LatLng(33.450705, 126.570677)
+        title: '신림', 
+        latlng: new kakao.maps.LatLng(37.4821999, 126.928909)
     },
     {
-        title: '생태연못', 
-        latlng: new kakao.maps.LatLng(33.450936, 126.569477)
+        title: '서울대', 
+        latlng: new kakao.maps.LatLng(37.4818013, 126.9503522)
     },
     {
-        title: '텃밭', 
-        latlng: new kakao.maps.LatLng(33.450879, 126.569940)
+        title: '사당', 
+        latlng: new kakao.maps.LatLng(37.4743761, 126.9814529)
     },
     {
         title: '근린공원',
