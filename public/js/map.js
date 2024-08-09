@@ -1,7 +1,5 @@
 let map; // 전역 변수로 맵 객체를 선언
 let markers = []; // 전역 변수로 마커 배열을 선언
-// 마커 이미지의 이미지 주소입니다
-var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"; 
 
 function initMap() {
     const container = document.getElementById('map');
