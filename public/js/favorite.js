@@ -44,12 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMy = document.getElementById('btnMy');
     const resultsContainer = document.getElementById('results-container');
 
-    btnMy.addEventListener('click', () => {
-        console.log('Sending request with username:', username); 
-        fetchMyData(username);
+    // 로그인 된 경우 자동으로 btnMy 클릭 이벤트 발생
+    if (username) {
+            fetchMyData(username);
+            handleButtonClick('my');
+   
+    }
 
-             // 'my' 버튼 클릭 시 favoriteMarkers 함수 호출
-             favoriteMarkers(data.fvtLocations);
+    btnMy.addEventListener('click', () => {
+            console.log('Sending request with username:', username); 
+            fetchMyData(username);
+
+            // 'my' 버튼 클릭 시 favoriteMarkers 함수 호출
+            favoriteMarkers(data.fvtLocations);
     });
 
     function fetchMyData(username) {

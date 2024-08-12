@@ -58,6 +58,10 @@
 <script>
     const locationList = <%- JSON.stringify(locationList) %>;
     const username = '<%= user ? user.username : '' %>';  
+
+    // 다른 스크립트에서 접근할 수 있도록 window 객체에 변수 할당
+    window.locationList = locationList;
+    window.username = username;
 </script>
 </body>
 </html>
