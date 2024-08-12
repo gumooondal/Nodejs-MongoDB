@@ -23,8 +23,7 @@ export function favoriteMarkers(fvtLocations) {
         latlng: new kakao.maps.LatLng(parseFloat(location.latitude), parseFloat(location.longitude))
     }));
 
-    // 마커 이미지의 이미지 주소입니다
-    var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+
 
     for (var i = 0; i < positions.length; i++) {
 
