@@ -132,15 +132,15 @@ html, body {
 #placesList .item .marker_15 {
     background-position: 0 -654px;
 }
-#pagination {
+#pagination-container {
     margin: 10px auto;
     text-align: center;
 }
-#pagination a {
+#pagination-container a {
     display: inline-block;
     margin-right: 10px;
 }
-#pagination .on {
+#pagination-container .on {
     font-weight: bold;
     cursor: default;
     color: #777;

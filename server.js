@@ -328,7 +328,10 @@ app.get('/my-data', async (req, res) => {
                   <h2>My Favorite List</h2>
                   <ul>
                       ${fvtLocations.map(location => `
-                        <li>${location.centername}<ion-icon name="star"></ion-icon></li>`).join('')}
+                        <li>${location.centername}
+                        <ion-icon name="star" onclick="confirmDelete('${location._id}')">
+                        </ion-icon>
+                        </li>`).join('')}
                   </ul>
               </div>
           `

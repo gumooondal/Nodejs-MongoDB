@@ -98,6 +98,34 @@ module.exports = (db) => {
             }
         }
     });
+
+    router.delete('/favoriteDelete', async (req, res) => {
+        const { id } = req.body; // 클라이언트로부터 받은 ID와 username
+        
+        // ID와 username이 제공되었는지 확인
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID and username are required' });
+        }
+        
+        try {
+            // 로그 출력 (디버깅 용도)
+            console.log('Received DELETE request');
+            console.log('Received ID:', id);
+        
+            const collection = db.collection('favorite');
+            const result = await collection.deleteOne({ location_id: id});
+        
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ success: false, message: 'Favorite not found' });
+            }
+        
+            // 성공 응답을 클라이언트로 반환
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    });
     
   return router;
 };
