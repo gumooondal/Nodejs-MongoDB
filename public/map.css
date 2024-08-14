@@ -50,7 +50,7 @@ body, html {
     background-color: yellowgreen; /* 하단 영역의 배경색 */
 }
 
-.search-bottom {
+.list-box {
     width: 100%;
     height: 85%;
     display: flex;
@@ -74,7 +74,8 @@ body, html {
 }
 
 #pagination-buttons {
-    margin-top: 20px; /* 상단 여백 추가 */
+    margin-top: 20px; /* 상단 여백 20px */
+    margin-bottom: 40px; /* 하단 여백 30px */
     display: flex;
     gap: 5px; /* 버튼 간격 추가 */
 }
@@ -99,7 +100,7 @@ body, html {
     background-color: #ff9999; /* 상단 영역의 배경색 */
 }
 
-.search-bottom {
+.list-box {
     background-color: white; /* 하단 영역의 배경색 */
 }
 
@@ -173,3 +174,32 @@ body, html {
     display: block; /* 'active' 클래스가 추가되면 표시 */
 }
 
+.user-info {
+    margin-bottom: 10px; /* 환영 메시지 아래 간격 */
+    text-align: left; /* 메시지 정렬 (예시) */
+}
+
+.logout-container {
+    text-align: right; /* 로그아웃 버튼 정렬 (예시) */
+}
+
+/* 다른 스타일링 예시 */
+.btn-logout {
+    padding: 10px 20px;
+    background-color: #f44336; /* 빨간색 배경 */
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #d32f2f; /* 더 어두운 빨간색 배경 */
+}
+
+.dashed-line {
+    border-top: 1px dashed #8B4513; /* 갈색 점선 테두리 */
+    margin: 20px 0; /* 상하 여백 */
+    padding: 10px 0; /* 상하 안쪽 여백 */
+    width: 90%; /* 전체 너비 */
+    /* height: 1px; */ /* 필요 시 높이 설정 (기본적으로 점선은 상단만 보임) */
+}

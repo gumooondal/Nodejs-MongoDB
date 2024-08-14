@@ -8,13 +8,13 @@ function handleButtonClick(buttonType) {
 
     // 클릭된 버튼에 'btn-active' 클래스 추가
     if (buttonType === 'search') {
-        if (activeButton) {
+        if (activeButton && activeButton !== searchButton) {
             activeButton.classList.remove('btn-active');
         }
         searchButton.classList.add('btn-active');
         activeButton = searchButton;
     } else if (buttonType === 'my') {
-        if (activeButton) {
+        if (activeButton && activeButton !== myButton) {
             activeButton.classList.remove('btn-active');
         }
         myButton.classList.add('btn-active');
@@ -22,14 +22,12 @@ function handleButtonClick(buttonType) {
     }
 }
 
-// 다른 영역 클릭 시 버튼 상태 초기화
+// 페이지 버튼 클릭 시 상태 변경하지 않도록
 document.addEventListener('click', (event) => {
-    // 클릭된 요소가 버튼 영역이 아닌 경우
-    if (!event.target.closest('.btnArea-search') && !event.target.closest('.btnArea-my')) {
+    if (event.target.closest('.btnArea-search') && event.target.closest('.btnArea-my')) {
         if (activeButton) {
             activeButton.classList.remove('btn-active');
             activeButton = null;
         }
     }
 });
-
