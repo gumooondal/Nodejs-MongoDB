@@ -1,5 +1,8 @@
 
 const express = require('express');
+//---------------------------------
+require('dotenv').config() //.env파일에 환경변수 보관하기 위한
+const javascriptKey = process.env.javascriptkey;
 
 module.exports = (db) => {
     const router = express.Router();
@@ -7,7 +10,7 @@ module.exports = (db) => {
     router.get('/', async (req, res) => {
         try {
             let locationList = await db.collection('location').find().toArray();
-            console.log(locationList);
+            //console.log(locationList);
             let count = await db.collection('location').countDocuments();
             console.log(`Number of documents: ${count}`);
 
@@ -16,7 +19,7 @@ module.exports = (db) => {
             console.log(user)
 
             // 데이터를 포함하여 main 페이지 렌더링
-            res.render('main', { locationList: locationList, user: user});
+            res.render('main', { locationList: locationList, user: user, javascriptKey: javascriptKey});
         } catch (error) {
           res.status(500).send(error.message);
         }

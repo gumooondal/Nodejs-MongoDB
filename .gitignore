@@ -1,0 +1,8 @@
+# Node.js 모듈
+node_modules/
+
+# 환경 변수 파일
+.env
+
+# 로그 파일
+*.log

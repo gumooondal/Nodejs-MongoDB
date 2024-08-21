@@ -18,6 +18,8 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 //---------------------------------
 require('dotenv').config() //.env파일에 환경변수 보관하기 위한
+const javascriptKey = process.env.javascriptkey;
+
 const registerRouter = require('./route/register.js')
 
 const bodyParser = require('body-parser');
@@ -258,15 +260,17 @@ app.get('/', (요청, 응답) => {
 })
 
 app.get('/map', (요청, 응답) => {
-  응답.render('map.ejs', {
-    javascriptkey: process.env.javascriptkey
-  })
+  응답.render('map.ejs')
 })
 
 app.get('/map3', (요청, 응답) => {
-  응답.render('map3.ejs', {
-    javascriptkey: process.env.javascriptkey
-  })
+  console.log(javascriptKey);
+  응답.render('map3.ejs')
+})
+
+app.get('/map2', (요청, 응답) => {
+  console.log(javascriptKey);
+  응답.render('map2.ejs', { javascriptKey: javascriptKey })
 })
 
 app.post('/search', async (req, res) => {
