@@ -6,3 +6,6 @@ node_modules/
 
 # 로그 파일
 *.log
+
+#보안관련해서..
+package-lock.json
